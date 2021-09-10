@@ -1,0 +1,86 @@
+stages:
+  - static analytics
+  - testing
+  - coverage
+  - deploy-dev
+
+flake8:
+  stage: static analytics
+  image: python:latest
+
+  variables:
+    DJANGO_SETTINGS_MODULE: core.settings.test
+
+  cache:
+    paths:
+      - ~/.cache/pip/
+
+  before_script:
+    - pip install pip   --upgrade
+    - pip install -r requirements.txt
+  script:
+    - flake8 --max-line-length=120 partenaire/*.py
+  only:
+    - merge_requests
+    - develop
+
+pylint:
+  stage: static analytics
+  image: python:latest
+
+  variables:
+    DJANGO_SETTINGS_MODULE: core.settings.test
+
+  cache:
+    paths:
+      - ~/.cache/pip/
+
+  before_script:
+    - pip install pip --upgrade
+    - pip install -r requirements.txt
+  script:
+    - pylint -d C0301 partenaire/*.py --disable=inconsistent-return-statements
+  only:
+    - merge_requests
+    - develop
+
+testing:
+  stage: testing
+  image: python:latest
+
+  variables:
+    DJANGO_SETTINGS_MODULE: core.settings.test
+
+  cache:
+    paths:
+      - ~/.cache/pip/
+
+  before_script:
+    - pip install pip   --upgrade
+    - pip install -r requirements.txt
+  script:
+    - python manage.py test
+  only:
+    - merge_requests
+    - develop
+
+coverage:
+  stage: coverage
+  image: python:latest
+
+  variables:
+    DJANGO_SETTINGS_MODULE: core.settings.test
+
+  cache:
+    paths:
+      - ~/.cache/pip/
+
+  before_script:
+    - pip install pip   --upgrade
+    - pip install -r requirements.txt
+  script:
+    - coverage run  manage.py  test && coverage report && coverage html
+  only:
+    - merge_requests
+    - develop
+

@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+  partenaire-api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    container_name: partenaire-api
+    command: bash -c "python manage.py migrate --settings=core.settings.prod"
+    # mem_limit: 2048MB
+    # mem_reservation: 1G
+    restart: always
+    volumes:
+      - .:/app/
+    networks:
+      - partenaire-net
+    ports:
+      - "8020:8020"
+    environment:
+      - PORT=8020
+    env_file:
+      - ./.env.docker
+    depends_on:
+      - partenaire-db
+
+  partenaire-db:
+    image: postgres:latest
+    restart: always
+    container_name: partenaire-db
+    networks:
+      - partenaire-net
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.docker
+
+  adminer:
+    image: adminer
+    container_name: partenaire-adminerUI
+    restart: unless-stopped
+    networks:
+      - partenaire-net
+    ports:
+      - 18081:8080
+
+networks:
+  partenaire-net:
+    driver: bridge
+# volumes:
+#   partenaire-db-pgadmin:

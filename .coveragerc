@@ -1,0 +1,7 @@
+[run]
+source = partenaire/
+omit=
+    venv
+    */migrations/*
+    */tests/*
+    %/__init__.py
